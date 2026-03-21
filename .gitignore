@@ -1,0 +1,11 @@
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+*.app/
+*.app.zip
+Assets/AssetStoreTools*
+/Logs/
+/UserSettings/
+.DS_Store
