@@ -5,12 +5,19 @@ using System.Collections.Generic;
 public class PlayerMovement : MonoBehaviourPun, IPunObservable 
 {
     [Header("Movimiento")]
-    public float climbSpeed = 3f;    
+    public float baseClimbSpeed = 5f;
+    private float slowTimer = 0f;
+    private bool isSlowed = false;
+    public float climbSpeed;    
     public float swingForce = 35f;   
     public float initialBurstMultiplier = 3f; 
     public float maxSwingSpeed = 15f;         
     
-    public float resistenciaAlViento = 0.4f; 
+    public float resistenciaAlViento = 0.4f;
+
+    private int hitCount = 0;
+    private bool canClimb = true;
+    private float disableTimer = 0f;
 
     [Header("Límites de Pantalla y Rebote")]
     public float maxHorizontalDistance = 3f; 
@@ -57,6 +64,9 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable
 
     void Start()
     {
+
+        climbSpeed = baseClimbSpeed;
+
         if (GetComponent<Rigidbody>() != null) GetComponent<Rigidbody>().isKinematic = true;
         //if (GetComponent<Collider>() != null) GetComponent<Collider>().enabled = false;
         
@@ -140,12 +150,72 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable
         }
     }
 
+    void DisableClimbing()
+    {
+        canClimb = false;
+        disableTimer = 2f;
+
+        Debug.Log("Climbing disabled for 2 seconds!");
+    }
+
+    void TakeHit()
+    {
+        
+        climbSpeed = baseClimbSpeed * 0.25f; 
+        isSlowed = true;
+        slowTimer = 1f;
+
+        hitCount++;
+
+        Debug.Log("Hit! Count: " + hitCount);
+
+        if (hitCount >= 5)
+        {
+            DisableClimbing();
+        }
+    }
+
+    void OnTriggerEnter(Collider collision)
+    {
+        if (!photonView.IsMine) return;
+
+        if (collision.gameObject.CompareTag("obs1"))
+        {
+            TakeHit();
+            Debug.Log("golpe");
+        }
+    }
+
     void Update()
     {
         if (ropeLinks.Count == 0 || ropePivot == null) return;
 
         if (photonView.IsMine)
         {
+            if (isSlowed)
+            {
+                slowTimer -= Time.deltaTime;
+
+                if (slowTimer <= 0f)
+                {
+                    climbSpeed = baseClimbSpeed;
+                    isSlowed = false;
+                }
+            }
+            // Handle temporary disable timer
+            if (!canClimb)
+            {
+                disableTimer -= Time.deltaTime;
+
+                if (disableTimer <= 0f)
+                {
+                    canClimb = true;
+                    hitCount = 0; // reset hits after penalty
+                }
+
+                return; // 🚨 blocks ALL input
+            }
+
             float verticalInput = 0f;
             if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) verticalInput = 1f;
             if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) verticalInput = -1f;
