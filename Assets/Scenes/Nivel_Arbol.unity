@@ -1294,6 +1294,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5cdfb131dd50a4a67934da6175e7455d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
+  probarDirectoEnEscena: 1
+  indicePersonajePrueba: 1
   spawnPointJ1: {fileID: 2145092255}
   spawnPointJ2: {fileID: 359836102}
   playerPrefabNames:

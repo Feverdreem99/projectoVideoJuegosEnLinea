@@ -5995,6 +5995,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1a079456a4a524a5ab877c1b39835ee2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyManager
+  modoPruebaRapida: 1
+  nombreEscenaJuego: Nivel_Arbol
   lobbyPanel: {fileID: 1790573380}
   roomPanel: {fileID: 1250917461}
   statusText: {fileID: 603966738}
