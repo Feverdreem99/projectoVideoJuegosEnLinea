@@ -1500,6 +1500,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 90159edbda7e944b5a34b878178b6818, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
+  baseClimbSpeed: 5
   climbSpeed: 3
   swingForce: 35
   initialBurstMultiplier: 3
