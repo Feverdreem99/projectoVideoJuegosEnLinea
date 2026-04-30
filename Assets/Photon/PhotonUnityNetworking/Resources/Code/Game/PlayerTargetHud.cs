@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Photon.Pun;
 
-public class PlayerTargetHud : MonoBehaviour
+public class PlayerTargetHud : MonoBehaviourPunCallbacks
 {
     [Header("UI Elements")]
     public RectTransform progressBarBg;
@@ -22,6 +22,10 @@ public class PlayerTargetHud : MonoBehaviour
     private PlayerMovement opponentPlayer;
     private Color originalTargetColor;
 
+    bool canMove = true;
+
+
+
     void Start()
     {
         if (opponentTargetImage != null) originalTargetColor = opponentTargetImage.color;
@@ -29,6 +33,8 @@ public class PlayerTargetHud : MonoBehaviour
 
     void Update()
     {
+        
+
         if (localPlayer == null || opponentPlayer == null)
         {
             FindPlayersInScene();
@@ -38,6 +44,20 @@ public class PlayerTargetHud : MonoBehaviour
         UpdateHeightIndicator();
         UpdateOpponentTarget();
         CheckAttackProximity();
+    }
+
+
+    [PunRPC]
+    void RPC_EndGame(string winnerName)
+    {
+        Debug.Log("Winner is: " + winnerName);
+
+        // Disable movement, show UI, etc.
+    }
+
+    void WinGame()
+    {
+        photonView.RPC("RPC_EndGame", RpcTarget.All, PhotonNetwork.NickName);
     }
 
     void FindPlayersInScene()
@@ -58,7 +78,18 @@ public class PlayerTargetHud : MonoBehaviour
 
         float indicatorY = (normalizedHeight * barHeight) - (barHeight / 2f);
         heightIndicator.anchoredPosition = new Vector2(heightIndicator.anchoredPosition.x, indicatorY);
+        
+        Debug.Log(currentHeight);
+
+        if (currentHeight >= alturaTotalDelNivel)
+        {
+            Debug.Log("Altura Maxima Alcanzada");
+            WinGame();
+           
+        }
     }
+
+
 
     void UpdateOpponentTarget()
     {

@@ -11,7 +11,8 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable
     public float climbSpeed;    
     public float swingForce = 35f;   
     public float initialBurstMultiplier = 3f; 
-    public float maxSwingSpeed = 15f;         
+    public float maxSwingSpeed = 15f;
+    
     
     public float resistenciaAlViento = 0.4f;
 
