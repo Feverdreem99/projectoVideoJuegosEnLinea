@@ -5,6 +5,10 @@ using TMPro;
 
 public class LobbyManager : MonoBehaviourPunCallbacks
 {
+    [Header("Modo Desarrollo")]
+    public bool modoPruebaRapida = false;
+    public string nombreEscenaJuego = "GameScene";
+
     [Header("Elementos de la UI")]
     public GameObject lobbyPanel;
     public GameObject roomPanel;
@@ -20,8 +24,17 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
     public override void OnConnectedToMaster()
     {
-        PhotonNetwork.JoinLobby();
-        statusText.text = "Conectado. Elige una opción.";
+        if (modoPruebaRapida)
+        {
+            statusText.text = "Modo Prueba: Entrando directo...";
+            RoomOptions opcionesTest = new RoomOptions { MaxPlayers = 1 };
+            PhotonNetwork.JoinOrCreateRoom("SalaDeDesarrollo", opcionesTest, TypedLobby.Default);
+        }
+        else
+        {
+            PhotonNetwork.JoinLobby();
+            statusText.text = "Conectado. Elige una opción.";
+        }
     }
 
     public void CreateRoom()
@@ -49,6 +62,14 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     public override void OnJoinedRoom()
     {
         statusText.text = "Sala: " + PhotonNetwork.CurrentRoom.Name;
+        
+        if (modoPruebaRapida || PhotonNetwork.CurrentRoom.MaxPlayers == 1)
+        {
+            Debug.Log("¡Cargando la escena de juego automáticamente!");
+            PhotonNetwork.LoadLevel(nombreEscenaJuego);
+            return; 
+        }
+
         lobbyPanel.SetActive(false);
         roomPanel.SetActive(true);
     }

@@ -12,6 +12,7 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable
     public float swingForce = 35f;   
     public float initialBurstMultiplier = 3f; 
     public float maxSwingSpeed = 15f;
+    public float velocidadCaida = 8f;
     
     
     public float resistenciaAlViento = 0.4f;
@@ -36,7 +37,7 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable
     [Header("Transición Elevador")]
     public float distanciaEscaladaFisica = 3f; 
     
-    [HideInInspector] public float totalClimbedDistance = 0f; 
+   public float totalClimbedDistance = 0f; 
 
     private List<Rigidbody> ropeLinks = new List<Rigidbody>();
     private float startX; 
@@ -156,6 +157,11 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable
         canClimb = false;
         disableTimer = 2f;
 
+        if (totalClimbedDistance > 0f)
+        {
+            if (anim != null) anim.SetBool("cayendo", true);
+        }
+
         Debug.Log("Climbing disabled for 2 seconds!");
     }
 
@@ -183,8 +189,9 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable
         if (collision.gameObject.CompareTag("obs1"))
         {
             TakeHit();
-            Debug.Log("golpe");
+            Debug.Log("Golpeado por un obstáculo");
         }
+
     }
 
     void Update()
@@ -203,11 +210,21 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable
                     isSlowed = false;
                 }
             }
-            // Handle temporary disable timer
+            
             if (!canClimb)
             {
                 disableTimer -= Time.deltaTime;
-
+                if (totalClimbedDistance > 0f)
+                {
+                    totalClimbedDistance -= velocidadCaida * Time.deltaTime;
+                    
+                    if (totalClimbedDistance <= 0f)
+                    {
+                        totalClimbedDistance = 0f;
+                        if (anim != null) anim.SetBool("cayendo", false);
+                    }
+                }
+                
                 if (disableTimer <= 0f)
                 {
                     canClimb = true;
@@ -216,17 +233,19 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable
 
                 return; 
             }
-
-            float verticalInput = 0f;
-            if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) verticalInput = 1f;
-            if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) verticalInput = -1f;
-
-            if (anim != null) anim.SetFloat("velocidadAnim", (verticalInput != 0) ? 1f : 0f);
-
-            if (verticalInput != 0)
+            else
             {
-                totalClimbedDistance += verticalInput * climbSpeed * Time.deltaTime;
-                if (totalClimbedDistance < 0) totalClimbedDistance = 0f;
+                float verticalInput = 0f;
+                if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) verticalInput = 1f;
+                if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) verticalInput = -1f;
+
+                if (anim != null) anim.SetFloat("velocidadAnim", (verticalInput != 0) ? 1f : 0f);
+
+                if (verticalInput != 0)
+                {
+                    totalClimbedDistance += verticalInput * climbSpeed * Time.deltaTime;
+                    if (totalClimbedDistance < 0) totalClimbedDistance = 0f;
+                }
             }
         }
 
@@ -285,8 +304,12 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable
         if (!photonView.IsMine || ropeLinks.Count == 0) return;
 
         float horizontalInput = 0f;
-        if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) horizontalInput = 1f;
-        if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) horizontalInput = -1f;
+
+        if (canClimb) 
+        {
+            if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) horizontalInput = 1f;
+            if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) horizontalInput = -1f;
+        }
 
         if (horizontalInput > 0 && rightCooldownTimer > 0) horizontalInput = 0f;
         if (horizontalInput < 0 && leftCooldownTimer > 0) horizontalInput = 0f;
