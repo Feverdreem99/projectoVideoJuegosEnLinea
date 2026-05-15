@@ -229,9 +229,9 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable
                 {
                     canClimb = true;
                     hitCount = 0; 
-                    
-                    if (anim != null) anim.SetBool("cayendo", false); 
                 }
+
+                return; 
             }
             else
             {
